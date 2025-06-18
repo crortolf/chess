@@ -19,8 +19,7 @@ public class Bishop extends ChessPiece{
     }
 
     public boolean checkVector(Vector move) {
-        return (move.dir == Direction.UP_RIGHT || move.dir == Direction.UP_LEFT
-            || move.dir == Direction.DOWN_LEFT || move.dir == Direction.DOWN_RIGHT);
+        return (move.dir.compareTo(Direction.RIGHT) > 0 && move.dir.compareTo(Direction.KNIGHT_UP_LEFT) < 0);
     }
 
     public Vector[] getMoves(byte x, byte y) {

@@ -16,10 +16,7 @@ public class Knight extends ChessPiece {
     }
 
     public boolean checkVector(Vector move) {
-        return (move.dir == Direction.KNIGHT_DOWN_LEFT || move.dir == Direction.KNIGHT_DOWN_RIGHT
-            || move.dir == Direction.KNIGHT_UP_LEFT || move.dir == Direction.KNIGHT_UP_RIGHT
-            || move.dir == Direction.KNIGHT_RIGHT_UP || move.dir == Direction.KNIGHT_RIGHT_DOWN
-            || move.dir == Direction.KNIGHT_LEFT_UP || move.dir == Direction.KNIGHT_LEFT_DOWN);
+        return (move.dir.compareTo(Direction.UP_LEFT) > 0);
     }
 
     public Vector[] getMoves(byte x, byte y) {

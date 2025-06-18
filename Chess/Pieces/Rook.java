@@ -16,8 +16,7 @@ public class Rook extends ChessPiece {
     }
 
     public boolean checkVector(Vector move) {
-        return (move.dir == Direction.UP || move.dir == Direction.DOWN
-            || move.dir == Direction.RIGHT || move.dir == Direction.LEFT);
+        return (move.dir.compareTo(Direction.INVALID) > 0 && move.dir.compareTo(Direction.UP_RIGHT) < 0);
     }
 
     public Vector[] getMoves(byte x, byte y) {

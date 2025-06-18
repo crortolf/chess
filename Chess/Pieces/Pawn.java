@@ -14,7 +14,6 @@ public class Pawn extends ChessPiece {
     }
 
     public boolean checkVector(Vector move) {
-
         if (move.limit != 1 && !(move.limit == 2 && !moved)) return false;
         return ((c == Color.BLACK && move.dir == Direction.DOWN) || (c == Color.WHITE && move.dir == Direction.UP));
     }

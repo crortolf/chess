@@ -5,7 +5,7 @@ import src.*;
 //parent class for all types of chess pieces, each piece is in charge of tracking how it moves
 public abstract class ChessPiece {
     public final Color c;
-    protected boolean moved;
+    public boolean moved;
 
     public ChessPiece(Color c) {
         this.c = c;

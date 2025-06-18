@@ -19,10 +19,7 @@ public class Queen extends ChessPiece {
     }
 
     public boolean checkVector(Vector move) {
-        return (move.dir == Direction.UP || move.dir == Direction.DOWN
-            || move.dir == Direction.RIGHT || move.dir == Direction.LEFT
-            || move.dir == Direction.UP_LEFT || move.dir == Direction.UP_RIGHT
-            || move.dir == Direction.DOWN_RIGHT || move.dir == Direction.DOWN_LEFT);
+        return (move.dir.compareTo(Direction.INVALID) > 0 && move.dir.compareTo(Direction.KNIGHT_UP_LEFT) < 0);
     }
 
     public Vector[] getMoves(byte x, byte y) {
