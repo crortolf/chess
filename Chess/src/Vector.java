@@ -14,8 +14,6 @@ public class Vector {
     }
 
     public Vector(byte x, byte y, byte moveX, byte moveY) {
-        this.x = x;
-        this.y = y;
         if (moveX == x) {
             if (moveY > y) dir = Direction.UP;
             else dir = Direction.DOWN;
@@ -50,6 +48,14 @@ public class Vector {
             else if (y - moveY == 1) dir = Direction.KNIGHT_LEFT_DOWN;
             else dir = Direction.INVALID;
         } else dir = Direction.INVALID;
+
+        if (dir.compareTo(Direction.UP_LEFT) > 0) {
+            this.x = moveX;
+            this.y = moveY;
+        } else {
+            this.x = x;
+            this.y = y;
+        }
     }
 
     public void limit(byte limit) {

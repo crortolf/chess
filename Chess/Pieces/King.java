@@ -8,9 +8,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class King extends ChessPiece {
+    private boolean moved;
 
     public King(Color c) {
         super(c);
+        moved = false;
+    }
+
+    public void moved() {
+        moved = true;
+    }
+
+    public boolean hasMoved() {
+        return moved;
     }
 
     public char toChar() {

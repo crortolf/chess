@@ -5,7 +5,6 @@ import src.*;
 //parent class for all types of chess pieces, each piece is in charge of tracking how it moves
 public abstract class ChessPiece {
     public final Color c;
-    public boolean moved;
 
     public ChessPiece(Color c) {
         this.c = c;
@@ -23,8 +22,10 @@ public abstract class ChessPiece {
         return 'E';
     }
 
-    public void moved() {
-        moved = true;
+    public void moved() {}
+
+    public boolean hasMoved() throws Exception {
+        throw new Exception("Cannot check moved on a "+this.getClass());
     }
 
     //all pieces extending the ChessPiece class should override with their own method that

@@ -2,11 +2,13 @@ package src;
 
 import Pieces.*;
 
+import java.util.Arrays;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
 public class main {
     private static ChessPiece[][] board;
+    private Vector previousMove;
 
     public static void main(String[] args) {
         Scanner scan = new Scanner(System.in);
@@ -15,14 +17,17 @@ public class main {
         boolean game = true, whiteTurn = true;
         Vector[] potentialMoves;
         Vector nextMove;
-        Pattern validCheck, validMove, concede, castleLeft, castleRight;
+        Pattern validCheck, validMove, concede, castleLeft, castleRight, promotionOptions;
 
         validMove = Pattern.compile("^[a-h][1-8]\s[a-h][1-8]$");
         validCheck = Pattern.compile("^[a-h][1-8]$");
         concede = Pattern.compile("^concede$");
         castleLeft = Pattern.compile("^castle left$");
         castleRight = Pattern.compile("^castle right$");
+        promotionOptions = Pattern.compile("^[1234]$");
 
+        newX = 8;
+        newY = 8;
 
         setBoard();
         /*
@@ -46,7 +51,7 @@ public class main {
             first = scan.nextLine().trim();
             //if the message is 'concede' we exit the game loop
             if (concede.matcher(first).matches()) game = false;
-            //if the message is a valid move (a grid space followed by whitespace followed by a grid space
+            //if the message is a valid move (a grid space followed by whitespace followed by a grid space)
             else if (validMove.matcher(first).matches()) {
                 //retrieve the starting location
                 x = (byte) (first.charAt(0) - 'a');
@@ -70,6 +75,9 @@ public class main {
                         nextMove = limitMove(nextMove, board[x][y].c);
                         //check that the vector is valid for the type of piece and see if the vector is unobstructed
                         if (board[x][y].checkVector(nextMove) && moveLength == nextMove.limit) {
+                            //if we get here, we are doing a standard move
+
+                            //TODO: add update for previous vector
                             //move the piece, print the new board, swap the turn, and tell the piece it moved
                             board[newX][newY] = board[x][y];
                             board[x][y] = null;
@@ -90,76 +98,136 @@ public class main {
                     potentialMoves = board[x][y].getMoves(x, y);
                     //limit based on other pieces on the board, and print
                     limitMoves(potentialMoves, board[x][y].c);
-                    printMoves(potentialMoves);
+                    printMoves(potentialMoves, x, y);
                 }
             //if the user wants to castle right
             } else if (castleRight.matcher(first).matches()) {
-                if (whiteTurn) {
-                    if (board[5][0] != null || board[6][0] != null) System.out.println("Invalid because other piece(s) obstruct right castle");
-                    else if (!(board[7][0] instanceof Rook) || board[7][0].moved) System.out.println("Invalid because the rook has moved");
-                    else if (!(board[4][0] instanceof King) || board[4][0].moved) System.out.println("Invalid because the king has moved");
-                    else {
-                        //successful right castle for white
-                        board[6][0] = board[4][0];
-                        board[4][0] = null;
-                        board[6][0].moved();
-                        board[5][0] = board[7][0];
-                        board[7][0] = null;
-                        board[5][0].moved();
-                        whiteTurn = !whiteTurn;
-                        printBoard();
+                try {
+                    if (whiteTurn) {
+                        if (board[5][0] != null || board[6][0] != null)
+                            System.out.println("Invalid because other piece(s) obstruct right castle");
+                        else if (!(board[7][0] instanceof Rook) || board[7][0].hasMoved())
+                            System.out.println("Invalid because the rook has moved");
+                        else if (!(board[4][0] instanceof King) || board[4][0].hasMoved())
+                            System.out.println("Invalid because the king has moved");
+                        else {
+                            //successful right castle for white
+                            board[6][0] = board[4][0];
+                            board[4][0] = null;
+                            board[6][0].moved();
+                            board[5][0] = board[7][0];
+                            board[7][0] = null;
+                            board[5][0].moved();
+                            whiteTurn = !whiteTurn;
+                            printBoard();
+                            //'reset' previous move trackers
+                            //TODO: add update for previous vector
+                        }
+                    } else {
+                        if (board[5][7] != null || board[6][7] != null)
+                            System.out.println("Invalid because other piece(s) obstruct right castle");
+                        else if (!(board[7][7] instanceof Rook) || board[7][7].hasMoved())
+                            System.out.println("Invalid because the rook has moved");
+                        else if (!(board[4][7] instanceof King) || board[4][7].hasMoved())
+                            System.out.println("Invalid because the king has moved");
+                        else {
+                            //successful right castle for black
+                            board[6][7] = board[4][7];
+                            board[4][7] = null;
+                            board[6][7].moved();
+                            board[5][7] = board[7][7];
+                            board[7][7] = null;
+                            board[5][7].moved();
+                            whiteTurn = !whiteTurn;
+                            printBoard();
+                            //'reset' previous move trackers
+                            //TODO: add update for previous vector
+                        }
                     }
-                } else {
-                    if (board[5][7] != null || board[6][7] != null) System.out.println("Invalid because other piece(s) obstruct right castle");
-                    else if (!(board[7][7] instanceof Rook) || board[7][7].moved) System.out.println("Invalid because the rook has moved");
-                    else if (!(board[4][7] instanceof King) || board[4][7].moved) System.out.println("Invalid because the king has moved");
-                    else {
-                        //successful right castle for black
-                        board[6][7] = board[4][7];
-                        board[4][7] = null;
-                        board[6][7].moved();
-                        board[5][7] = board[7][7];
-                        board[7][7] = null;
-                        board[5][7].moved();
-                        whiteTurn = !whiteTurn;
-                        printBoard();
-                    }
+                } catch (Exception e) {
+                    System.out.println("Error: the following was attempted when castling right:");
+                    System.out.println(e);
                 }
             //if the user wants to castle left
             } else if (castleLeft.matcher(first).matches()) {
-                if (whiteTurn) {
-                    if (board[1][0] != null || board[2][0] != null || board[3][0] != null) System.out.println("Invalid because other piece(s) obstruct left castle");
-                    else if (!(board[0][0] instanceof Rook) || board[0][0].moved) System.out.println("Invalid because the rook has moved");
-                    else if (!(board[4][0] instanceof King) || board[4][0].moved) System.out.println("Invalid because the king has moved");
-                    else {
-                        //successful left castle for white
-                        board[2][0] = board[4][0];
-                        board[4][0] = null;
-                        board[2][0].moved();
-                        board[3][0] = board[0][0];
-                        board[0][0] = null;
-                        board[3][0].moved();
-                        whiteTurn = !whiteTurn;
-                        printBoard();
+                try {
+                    if (whiteTurn) {
+                        if (board[1][0] != null || board[2][0] != null || board[3][0] != null)
+                            System.out.println("Invalid because other piece(s) obstruct left castle");
+                        else if (!(board[0][0] instanceof Rook) || board[0][0].hasMoved())
+                            System.out.println("Invalid because the rook has moved");
+                        else if (!(board[4][0] instanceof King) || board[4][0].hasMoved())
+                            System.out.println("Invalid because the king has moved");
+                        else {
+                            //successful left castle for white
+                            board[2][0] = board[4][0];
+                            board[4][0] = null;
+                            board[2][0].moved();
+                            board[3][0] = board[0][0];
+                            board[0][0] = null;
+                            board[3][0].moved();
+                            whiteTurn = !whiteTurn;
+                            printBoard();
+                            //'reset' previous move trackers
+                            //TODO: add update for previous vector
+                        }
+                    } else {
+                        if (board[1][7] != null || board[2][7] != null || board[3][7] != null)
+                            System.out.println("Invalid because other piece(s) obstruct left castle");
+                        else if (!(board[0][7] instanceof Rook) || board[0][7].hasMoved())
+                            System.out.println("Invalid because the rook has moved");
+                        else if (!(board[4][7] instanceof King) || board[4][7].hasMoved())
+                            System.out.println("Invalid because the king has moved");
+                        else {
+                            //successful left castle for black
+                            board[2][7] = board[4][7];
+                            board[4][7] = null;
+                            board[2][7].moved();
+                            board[3][7] = board[0][7];
+                            board[0][7] = null;
+                            board[3][7].moved();
+                            whiteTurn = !whiteTurn;
+                            printBoard();
+                            //'reset' previous move trackers
+                            //TODO: add update for previous vector
+                        }
                     }
-                } else {
-                    if (board[1][7] != null || board[2][7] != null || board[3][7] != null) System.out.println("Invalid because other piece(s) obstruct left castle");
-                    else if (!(board[0][7] instanceof Rook) || board[0][7].moved) System.out.println("Invalid because the rook has moved");
-                    else if (!(board[4][7] instanceof King) || board[4][7].moved) System.out.println("Invalid because the king has moved");
-                    else {
-                        //successful left castle for black
-                        board[2][7] = board[4][7];
-                        board[4][7] = null;
-                        board[2][7].moved();
-                        board[3][7] = board[0][7];
-                        board[0][7] = null;
-                        board[3][7].moved();
-                        whiteTurn = !whiteTurn;
-                        printBoard();
-                    }
+                } catch (Exception e) {
+                    System.out.println("Error: the following was attempted when castling left:");
+                    System.out.println(e);
                 }
             } else System.out.println("Invalid syntax");
 
+            //check for pawn promotion
+            if (newX < 8 && newY < 8 && board[newX][newY] instanceof Pawn
+                    && ((newY == 7 && board[newX][newY].c == Color.WHITE) || (newY == 0 && board[newX][newY].c == Color.BLACK))) {
+                boolean validSelection = false;
+                ChessPiece temp;
+                Color team = board[newX][newY].c;
+                while (!validSelection) {
+                    //print options for promotion and wait for input
+                    System.out.println("Pawn promotion! Choose option:\n1 Queen\n2 Knight\n3 Rook\n4 Bishop");
+                    first = scan.nextLine().trim();
+                    if (promotionOptions.matcher(first).matches()) validSelection = true;
+                }
+                switch (Byte.valueOf(first)) {
+                    case 1:
+                        temp = new Queen(team);
+                        break;
+                    case 2:
+                        temp = new Knight(team);
+                        break;
+                    case 3:
+                        temp = new Rook(team);
+                        break;
+                    default:
+                        temp = new Bishop(team);
+                        break;
+                }
+                temp.moved();
+                board[newX][newY] = temp;
+                printBoard();
+            }
         }
 
         scan.close();
@@ -167,7 +235,7 @@ public class main {
     }
 
     //creates duplicate board, then replaces all appropriate spaces with # to show the piece can move there
-    private static void printMoves(Vector[] moves) {
+    private static void printMoves(Vector[] moves, int pieceX, int pieceY) {
         ChessPiece[][] hypoBoard = new ChessPiece[8][8];
         byte x, y, spaces;
 
@@ -182,12 +250,17 @@ public class main {
                 x = move.x;
                 y = move.y;
                 for (spaces = -1; spaces < move.limit; spaces++) {
-                    hypoBoard[x][y] = new PotentialMove();
+                    //we assume the piece is an enemy piece here, allied pieces would have been removed from
+                    //potential moves by the limiting of the moves earlier
+                    if (board[x][y] != null) hypoBoard[x][y] = new PotentialCapture();
+                    else hypoBoard[x][y] = new PotentialMove();
                     x = moveX(move.dir, x);
                     y = moveY(move.dir, y);
                 }
             }
         }
+
+        hypoBoard[pieceX][pieceY] = new MoveOrigin();
 
         printBoard(hypoBoard);
     }
@@ -262,6 +335,30 @@ public class main {
                 if (board[vx][vy] != null) {
                     if (team != board[vx][vy].c) move.limit((byte) (index + 1));
                     else move.limit(index);
+                }
+            }
+        }
+        //checks for pawn movement and capture
+        if (board[move.x][move.y] instanceof Pawn) {
+            if (move.dir == Direction.UP) {
+                if (board[move.x][move.y + 1] != null) move = new Vector(Direction.INVALID, move.x, move.y, move.limit);
+            } else if (move.dir == Direction.DOWN) {
+                if (board[move.x][move.y - 1] != null) move = new Vector(Direction.INVALID, move.x, move.y, move.limit);
+            } else if (move.dir == Direction.UP_LEFT) {
+                if (!(board[move.x - 1][move.y + 1] != null && board[move.x - 1][move.y + 1].c != team)) {
+                    move = new Vector(Direction.INVALID, move.x, move.y, move.limit);
+                }
+            } else if (move.dir == Direction.UP_RIGHT) {
+                if (!(board[move.x + 1][move.y + 1] != null && board[move.x + 1][move.y + 1].c != team)) {
+                    move = new Vector(Direction.INVALID, move.x, move.y, move.limit);
+                }
+            } else if (move.dir == Direction.DOWN_LEFT) {
+                if (!(board[move.x - 1][move.y - 1] != null && board[move.x - 1][move.y - 1].c != team)) {
+                    move = new Vector(Direction.INVALID, move.x, move.y, move.limit);
+                }
+            } else if (move.dir == Direction.DOWN_RIGHT) {
+                if (!(board[move.x + 1][move.y - 1] != null && board[move.x + 1][move.y - 1].c != team)) {
+                    move = new Vector(Direction.INVALID, move.x, move.y, move.limit);
                 }
             }
         }

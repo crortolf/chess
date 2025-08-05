@@ -1,0 +1,6 @@
+need to add checks for mate
+
+need to add promotion
+need to make sure kings and rooks created from promotion cannot castle with each other
+
+en passent - add vector that tracks most recently executed move, needs to be set to null after castle

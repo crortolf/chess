@@ -1,0 +1,3 @@
+need to add checks for mate
+
+en passent - add vector that tracks most recently executed move, needs to be set to null after castle
